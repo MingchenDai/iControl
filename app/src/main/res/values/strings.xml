@@ -3,4 +3,55 @@
     <string name="title_home">主页</string>
     <string name="title_dashboard">选项</string>
     <string name="title_notifications">关于</string>
+
+    <string name="home_textview_switch_status_1">不可用</string>
+    <string name="home_textview_switch_status_2">不可用</string>
+    <string name="home_button_switch_1_description">开关</string>
+    <string name="home_button_switch_2_description">开关</string>
+    <string name="home_button_refresh_description">刷新</string>
+    <string name="home_bluetooth_status_ready">就绪</string>
+    <string name="home_bluetooth_status_success">操作成功</string>
+    <string name="home_bluetooth_status_connecting">正在连接</string>
+    <string name="home_bluetooth_status_initializing">正在初始化</string>
+    <string name="home_bluetooth_status_fail_notice">操作失败\n
+        请检查设备是否支持蓝牙\n
+        蓝牙权限是否打开\n
+        备是否在蓝牙连接范围内</string>
+    <string name="home_bluetooth_status_init_null">未初始化</string>
+    <string name="home_bluetooth_status_init_fail_unsupported">初始化失败：不支持的设备</string>
+    <string name="home_bluetooth_status_init_fail_disabled">初始化失败：设备未打开蓝牙</string>
+    <string name="home_bluetooth_status_init_fail_unauthorized">初始化失败：未授予蓝牙权限</string>
+    <string name="home_bluetooth_status_connected">蓝牙已连接</string>
+    <string name="home_bluetooth_connect_fail">蓝牙连接失败</string>
+    <string name="home_bluetooth_send_fail"><b>信号发送不成功。</b>请前往选项界面校正开关状态。</string>
+    <string name="home_bluetooth_send_unavailable"><b>蓝牙错误。</b>请检查系统配置。</string>
+    <string name="home_switch_status_on">开</string>
+    <string name="home_switch_status_off">关</string>
+    <string name="home_switch_status_unavailable">不可用</string>
+    <string name="home_image_bluetooth_description">蓝牙连接状态</string>
+
+
+    <string name="dashboard_textview_switch">开关</string>
+    <string name="dashboard_textview_switch_status_1">开关1状态</string>
+    <string name="dashboard_textview_switch_status_2">开关2状态</string>
+    <string name="dashboard_textview_bar">当按下开关上端时</string>
+    <string name="dashboard_textview_bar_status_1">开关1状态</string>
+    <string name="dashboard_textview_bar_status_2">开关2状态</string>
+    <string name="dashboard_button_update">更新</string>
+
+    <string name="notifications_textview_version">版本 1.0.0</string>
+    <!--<string name="notifications_textview_introduction">\u3000\u3000 Android应用“iControl”为上海交通大学工程学导论项目“通用远程机械灯控开关”的一部分。\n
+        \u3000\u3000本项目遵从GPL-3.0协议并且在GitHub开放源代码。\n
+        \n
+        \u3000\u3000<b>项目小组成员</b>\n
+        \u3000\u3000组长：祁宇昂\n
+        \u3000\u3000组员：戴铭辰、王玺麟、许佳宁、肖钟麟\n
+        \n
+        \u3000\u3000<b>联系方式</b>\n
+        \u3000\u3000t.resol@sjtu.edu.cn\n
+    </string>-->
+    <string name="notifications_textview_introduction">introduction</string>
+    <string name="notifications_button_github_description">GitHub</string>
+    <string name="notifications_button_github_caption">Github仓库</string>
+    <string name="notifications_button_license_caption">开源协议</string>
 </resources>

@@ -1,4 +1,4 @@
-package com.example.icontrol.ui.dashboard;
+/*package com.example.icontrol.ui.dashboard;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -16,4 +16,4 @@ public class DashboardViewModel extends ViewModel {
     public LiveData<String> getText() {
         return mText;
     }
-}
+}*/

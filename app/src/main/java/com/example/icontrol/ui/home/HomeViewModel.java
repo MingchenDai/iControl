@@ -1,4 +1,4 @@
-package com.example.icontrol.ui.home;
+/*package com.example.icontrol.ui.home;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -16,4 +16,4 @@ public class HomeViewModel extends ViewModel {
     public LiveData<String> getText() {
         return mText;
     }
-}
+}*/

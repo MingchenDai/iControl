@@ -12,4 +12,10 @@
     <color name="switch_activated">#FF00FF00</color>
     <color name="switch_inactivated">#FF808080</color>
     <color name="switch_unavailable">#FFFF0000</color>
+    <color name="switch_default">#00000000</color>
+    <color name="switch_test">#FFff0000</color>
+    <color name="bluetooth">#FF2260A5</color>
+
+    <!--Variables-->
+
 </resources>

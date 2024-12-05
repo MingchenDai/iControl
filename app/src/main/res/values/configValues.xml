@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--Bluetooth-->
+    <string name="baud">9600</string>
+    <string name="user_name">SWITCH</string>
+    <string name="password">1896</string>
+
+    <!--Switch-->
+    <string name="switch_status_1">False</string>
+    <string name="switch_status_2">False</string>
+    <string name="init">False</string>
+</resources>

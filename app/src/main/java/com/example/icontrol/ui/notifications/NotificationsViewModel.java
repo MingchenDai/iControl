@@ -1,4 +1,4 @@
-package com.example.icontrol.ui.notifications;
+/*package com.example.icontrol.ui.notifications;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -16,4 +16,5 @@ public class NotificationsViewModel extends ViewModel {
     public LiveData<String> getText() {
         return mText;
     }
-}
+
+}*/
