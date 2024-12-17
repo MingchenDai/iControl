@@ -40,7 +40,7 @@
     <string name="dashboard_button_update">更新</string>
 
     <string name="notifications_textview_version">版本 1.0.0</string>
-    <!--<string name="notifications_textview_introduction">\u3000\u3000 Android应用“iControl”为上海交通大学工程学导论项目“通用远程机械灯控开关”的一部分。\n
+    <string name="notifications_textview_introduction">\u3000\u3000 Android应用“iControl”为上海交通大学工程学导论项目“通用远程机械灯控开关”的一部分。\n
         \u3000\u3000本项目遵从GPL-3.0协议并且在GitHub开放源代码。\n
         \n
         \u3000\u3000<b>项目小组成员</b>\n
@@ -49,8 +49,7 @@
         \n
         \u3000\u3000<b>联系方式</b>\n
         \u3000\u3000t.resol@sjtu.edu.cn\n
-    </string>-->
-    <string name="notifications_textview_introduction">introduction</string>
+    </string>
     <string name="notifications_button_github_description">GitHub</string>
     <string name="notifications_button_github_caption">Github仓库</string>
     <string name="notifications_button_license_caption">开源协议</string>

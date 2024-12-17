@@ -1,21 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
+    <color name="purple_200">#FF016AED</color>
+    <color name="purple_500">#FF016AED</color>
+    <color name="purple_700">#FF016AED</color>
     <color name="teal_200">#FF03DAC5</color>
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="sjtu_red_full">#FFC8161E</color>
+    <color name="sjtu_red_full">#FFC8171E</color>
     <color name="sjtu_red_half">#80C8161E</color>
-    <color name="switch_activated">#FF00FF00</color>
+    <color name="switch_activated">#FF5A9218</color>
     <color name="switch_inactivated">#FF808080</color>
-    <color name="switch_unavailable">#FFFF0000</color>
+    <color name="switch_unavailable">#FFFA541C</color>
     <color name="switch_default">#00000000</color>
-    <color name="switch_test">#FFff0000</color>
     <color name="bluetooth">#FF2260A5</color>
-
-    <!--Variables-->
-
+    <color name="default_color">#FF016AED</color>
 </resources>
