@@ -4,7 +4,7 @@ iControl is an application developed as part of the project of *Introduction to 
 
 ### Table of Contents
 
-- [Project Overview](#Project Overview)
+- [Project Overview](#ProjectOverview)
 - [Features](#Features)
 - [Installation](#Installations)
 - [License](#License)
