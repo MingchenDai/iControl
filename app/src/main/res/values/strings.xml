@@ -21,10 +21,10 @@
     <string name="home_bluetooth_status_init_fail_unsupported">初始化失败：不支持的设备</string>
     <string name="home_bluetooth_status_init_fail_disabled">初始化失败：设备未打开蓝牙</string>
     <string name="home_bluetooth_status_init_fail_unauthorized">初始化失败：未授予蓝牙权限</string>
-    <string name="home_bluetooth_status_connected">蓝牙已连接</string>
+    <string name="home_bluetooth_connect_success">蓝牙已连接</string>
     <string name="home_bluetooth_connect_fail">蓝牙连接失败</string>
     <string name="home_bluetooth_send_fail"><b>信号发送不成功。</b>请前往选项界面校正开关状态。</string>
-    <string name="home_bluetooth_send_unavailable"><b>蓝牙错误。</b>请检查系统配置。</string>
+    <string name="home_bluetooth_send_unavailable"><b>发送失败。</b>请检查系统配置。</string>
     <string name="home_switch_status_on">开</string>
     <string name="home_switch_status_off">关</string>
     <string name="home_switch_status_unavailable">不可用</string>

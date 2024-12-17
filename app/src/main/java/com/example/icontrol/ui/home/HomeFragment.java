@@ -20,7 +20,6 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -43,6 +42,7 @@ public class HomeFragment extends Fragment {
 
     private ImageButton home_button_switch_1;
     private ImageButton home_button_switch_2;
+    private ImageButton home_button_refresh;
     private TextView home_textview_switch_status_1;
     private TextView home_textview_switch_status_2;
     private TextView home_textview_bluetooth_status;
@@ -62,77 +62,80 @@ public class HomeFragment extends Fragment {
     private BluetoothSocket bluetoothSocket=null;
     private final BluetoothDevice bluetoothDevice=bluetoothAdapter.getRemoteDevice("00:24:07:00:41:18");//00:24:07:00:41:18
     private int bluetoothAvailability=0;
-    private boolean hasInitialized=false;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         View rootView=inflater.inflate(R.layout.fragment_home,container,false);
-        ImageButton home_button_refresh = rootView.findViewById(R.id.home_button_refresh);
         home_button_switch_1=rootView.findViewById(R.id.home_button_switch_1);
         home_button_switch_2=rootView.findViewById(R.id.home_button_switch_2);
+        home_button_refresh= rootView.findViewById(R.id.home_button_refresh);
         home_textview_switch_status_1=rootView.findViewById(R.id.home_textview_switch_status_1);
         home_textview_switch_status_2=rootView.findViewById(R.id.home_textview_switch_status_2);
         home_textview_bluetooth_status=rootView.findViewById(R.id.home_bluetooth_status);
         home_imageview_bluetooth_status=rootView.findViewById(R.id.home_imageview_bluetooth_status);
-        init(hasInitialized);
-        home_button_switch_1.setOnClickListener(v -> homeButtonAction(home_button_switch_1,home_textview_switch_status_1,1));
-        home_button_switch_2.setOnClickListener(v -> homeButtonAction(home_button_switch_2,home_textview_switch_status_2,2));
-        home_button_refresh.setOnClickListener(v -> init(false));
+        homeInit();
+        home_button_switch_1.setOnClickListener(v->homeImageButtonAction(home_button_switch_1,home_textview_switch_status_1,1));
+        home_button_switch_2.setOnClickListener(v->homeImageButtonAction(home_button_switch_2,home_textview_switch_status_2,2));
+        home_button_refresh.setOnClickListener(v->homeReset());
+
         return rootView;
     }
 
-    private void init(boolean judge){
-        if(judge&&(homeBluetoothConnected(bluetoothAdapter))){
-            homeBluetoothRefreshUI(R.drawable.bluetooth_connected,R.string.home_bluetooth_status_ready);
+    private void homeInit(){
+        homeBluetoothInit();
+        if(bluetoothAvailability>0){
+            homeBluetoothConnect();
         }
-        else{
-            homeBluetoothInit();
-            if(bluetoothAvailability>0){
-                if(bluetoothSocket!=null){
-                    try{
-                        bluetoothSocket.close();
-                        Toast.makeText(requireContext(),"success",Toast.LENGTH_SHORT).show();
-                    } catch (IOException e) {
-                        Log.e(TAG,"INIT",e);
-                    }
-                }
-                homeBluetoothConnect();
-            }
-        }
-        homeButtonInit(home_button_switch_1,home_textview_switch_status_1,"status_switch_1");
-        homeButtonInit(home_button_switch_2,home_textview_switch_status_2,"status_switch_2");
-        hasInitialized=true;
+        homeImageButtonInit(home_button_switch_1,home_textview_switch_status_1,"status_switch_1");
+        homeImageButtonInit(home_button_switch_2,home_textview_switch_status_2,"status_switch_2");
     }
 
-    public void homeButtonAction(ImageButton imageButton,TextView textView,int signal){
-        if(bluetoothAvailability==2){
-            String switch_key="switch_status_"+signal;
-            String bar_key="bar_status_"+signal;
+    private void homeReset(){
+        bluetoothAvailability=0;
+        try{
+            bluetoothSocket=null;
+        }
+        catch(Exception e){
+            Log.e(TAG,"homeReset",e);
+        }
+        homeInit();
+    }
+
+    private void homeSharedPreferencesInit(){
+        sharedPreferences=requireContext().getSharedPreferences("config", Context.MODE_PRIVATE);
+        editor=sharedPreferences.edit();
+    }
+
+    private void homeSharedPreferencesDelete(){
+        editor.commit();
+        sharedPreferences=null;
+    }
+
+    private void homeImageButtonAction(ImageButton imageButton,TextView textView,int signal){
+        if(bluetoothAvailability!=2){
+            home_textview_bluetooth_status.setText(R.string.home_bluetooth_send_unavailable);
+        }
+        else{
+            String switch_key="status_switch_"+signal;
+            String bar_key="status_bar_"+signal;
             homeSharedPreferencesInit();
             signal+=(sharedPreferences.getInt(switch_key,-1)+sharedPreferences.getInt(bar_key,-1))%2*2;
-            boolean flag=homeBluetoothSend(String.valueOf(signal));
+            boolean flag=homeBluetoothSend(signal);
             if(flag){
                 int status = 1-sharedPreferences.getInt(switch_key, -1);
                 editor.putInt(switch_key,status);
-                editor.commit();
-                homeButtonChange(imageButton,textView,status);
+                homeSharedPreferencesDelete();
+                homeImageButtonInit(imageButton,textView,switch_key);
             }
             else{
                 home_textview_bluetooth_status.setText(R.string.home_bluetooth_send_fail);
             }
         }
-        else{
-            home_textview_bluetooth_status.setText(R.string.home_bluetooth_send_unavailable);
-        }
     }
 
-    private void homeButtonInit(ImageButton imageButton,TextView textView,String key){
+    private void homeImageButtonInit(ImageButton imageButton,TextView textView,String key){
         homeSharedPreferencesInit();
-        int status = sharedPreferences.getInt(key, -1);
-        homeButtonChange(imageButton,textView,status);
-    }
-
-    private void homeButtonChange(ImageButton imageButton,TextView textView,int status){
+        int status=sharedPreferences.getInt(key,-1);
         if(status==1){
             textView.setTextColor(ContextCompat.getColor(requireContext(),R.color.switch_inactivated));
             textView.setText(R.string.home_switch_status_off);
@@ -148,27 +151,37 @@ public class HomeFragment extends Fragment {
             textView.setText(R.string.home_switch_status_unavailable);
             imageButton.setImageResource(R.drawable.switch_unavailable);
         }
+        homeSharedPreferencesDelete();
+    }
+
+    private void homeRefreshUI(int imageResource,int text){
+        Handler handler=new Handler(Looper.getMainLooper());
+        handler.post(()->{
+            home_imageview_bluetooth_status.setImageResource(imageResource);
+            home_textview_bluetooth_status.setText(text);
+        });
     }
 
     private void homeBluetoothInit(){
-        homeBluetoothRefreshUI(R.drawable.bluetooth_searching,R.string.home_bluetooth_status_initializing);
-        if(bluetoothAdapter==null){
+        homeRefreshUI(R.drawable.bluetooth_ready,R.string.home_bluetooth_status_initializing);
+        if(bluetoothAdapter==null) {
+            homeRefreshUI(R.drawable.bluetooth_unavailable,R.string.home_bluetooth_status_init_fail_unsupported);
             bluetoothAvailability=-1;
-            homeBluetoothRefreshUI(R.drawable.bluetooth_unavailable,R.string.home_bluetooth_status_init_fail_unsupported);
             return;
         }
-        if((Build.VERSION.SDK_INT>=Build.VERSION_CODES.S)&&(!homeBluetoothAuthorized())) {
+        if((Build.VERSION.SDK_INT>=Build.VERSION_CODES.S)&&(!homeBluetoothAuthorized())){
             requestMultiplePermissionsLauncher.launch(PERMISSIONS);
         }
         homeBluetoothEnable();
     }
 
-    private final ActivityResultLauncher<String[]> requestMultiplePermissionsLauncher=registerForActivityResult(
+    private final ActivityResultLauncher<String[]>
+    requestMultiplePermissionsLauncher=registerForActivityResult(
             new ActivityResultContracts.RequestMultiplePermissions(),
-            isGranted ->{
+            isGranted->{
                 if(isGranted.containsValue(false)){
                     bluetoothAvailability=-2;
-                    homeBluetoothRefreshUI(R.drawable.bluetooth_unavailable,R.string.home_bluetooth_status_init_fail_unauthorized);
+                    homeRefreshUI(R.drawable.bluetooth_unavailable,R.string.home_bluetooth_status_init_fail_unauthorized);
                 }
                 else{
                     homeBluetoothEnable();
@@ -178,107 +191,16 @@ public class HomeFragment extends Fragment {
 
     private void homeBluetoothEnable(){
         if(bluetoothAdapter.isEnabled()){
-            homeBluetoothRefreshUI(R.drawable.bluetooth_ready,R.string.home_bluetooth_status_ready);
+            homeRefreshUI(R.drawable.bluetooth_ready,R.string.home_bluetooth_status_ready);
             bluetoothAvailability=1;
         }
         else{
-            homeBluetoothRefreshUI(R.drawable.bluetooth_unavailable,R.string.home_bluetooth_status_init_fail_disabled);
+            homeRefreshUI(R.drawable.bluetooth_unavailable,R.string.home_bluetooth_status_init_fail_disabled);
             bluetoothAvailability=-3;
         }
     }
 
-    private void homeSharedPreferencesInit(){
-         sharedPreferences=requireContext().getSharedPreferences("config", Context.MODE_PRIVATE);
-         editor=sharedPreferences.edit();
-    }
-
-    private void homeBluetoothConnect(){
-        homeBluetoothRefreshUI(R.drawable.bluetooth_searching,R.string.home_bluetooth_status_connecting);
-        if(ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.BLUETOOTH_SCAN)!= PackageManager.PERMISSION_GRANTED) {
-            homeBluetoothRefreshUI(R.drawable.bluetooth_unavailable,R.string.home_bluetooth_status_init_fail_unauthorized);
-        }
-        else{
-            //bluetoothAdapter.startDiscovery();
-            try{
-                bluetoothSocket=bluetoothDevice.createInsecureRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805f9b34fb"));
-                ConnectThread connectThread = new ConnectThread(bluetoothSocket, true);
-                connectThread.start();
-            }
-            catch(IOException e){
-                homeBluetoothRefreshUI(R.drawable.bluetooth_unconnected,R.string.home_bluetooth_connect_fail);
-                Log.e(TAG,"homeBluetoothConnect:",e);
-            }
-        }
-    }
-    
-    private class ConnectThread extends Thread{
-        private BluetoothSocket bluetoothSocket;
-        private boolean activeConnect;
-        private ConnectThread(BluetoothSocket bluetoothSocket,boolean connect){
-            this.bluetoothSocket=bluetoothSocket;
-            this.activeConnect=connect;
-        }
-
-        @Override
-        public void run(){
-            if(activeConnect){
-                try{
-                    bluetoothSocket=bluetoothDevice.createRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"));
-                    //bluetoothSocket=(BluetoothSocket)bluetoothDevice.getClass().getMethod("createRfcommSocket", new Class[] {int.class}).invoke(bluetoothDevice,1);
-                } catch (Exception e) {
-                    Log.e(TAG,"ConnectThread",e);
-                }
-                try{
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    Log.e(TAG,"ConnectThread",e);
-                }
-                new Thread(){
-                    @Override
-                    public void run(){
-                        try{
-                            bluetoothSocket.connect();
-                            homeBluetoothRefreshUI(R.drawable.bluetooth_connected,R.string.home_bluetooth_status_connected);
-                            bluetoothAvailability=2;
-                        }catch (IOException e) {
-                            homeBluetoothRefreshUI(R.drawable.bluetooth_unconnected,R.string.home_bluetooth_connect_fail);
-                            bluetoothAvailability=1;
-                            Log.e(TAG,"ConnectThread",e);
-                        }
-                    }
-                }.start();
-            }
-        }
-    }
-
-    private void homeBluetoothRefreshUI(int imageResource,int text){
-        Handler handler=new Handler(Looper.getMainLooper());
-        handler.post(() -> {
-            home_imageview_bluetooth_status.setImageResource(imageResource);
-            home_textview_bluetooth_status.setText(text);
-        });
-    }
-
-    public boolean homeBluetoothSend(String signal){
-        if(ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED){
-            homeBluetoothRefreshUI(R.drawable.bluetooth_unavailable,R.string.home_bluetooth_status_init_fail_unauthorized);
-        }
-        else{
-            try{
-
-                bluetoothSocket=bluetoothDevice.createRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805f9b34fb"));
-                OutputStream outputStream=bluetoothSocket.getOutputStream();
-                bluetoothSocket.getOutputStream().write(signal.getBytes(),0,1);
-            }
-            catch(IOException e){
-                Log.e(TAG,"homeBluetoothSend:",e);
-                return false;
-            }
-        }
-        return true;
-    }
-
-    boolean homeBluetoothAuthorized(){
+    private boolean homeBluetoothAuthorized(){
         boolean scanPermission = ContextCompat.checkSelfPermission(
                 requireContext(),
                 Manifest.permission.BLUETOOTH_SCAN
@@ -302,23 +224,94 @@ public class HomeFragment extends Fragment {
         return (scanPermission)&&(connectPermission)&&(advertisePermission)&&(adminPermission)&&(Permission);
     }
 
-    boolean homeBluetoothConnected(BluetoothAdapter bluetoothAdapter){
+    private boolean homeBluetoothConnected(BluetoothAdapter bluetoothAdapter){
         try{
-            Method method=bluetoothAdapter.getClass().getDeclaredMethod("getConnectionState", (Class[]) null);
-            method.setAccessible(true);
-            int state=(int)method.invoke(bluetoothAdapter,(Object[]) null);
+            Method method=bluetoothAdapter.getClass().getDeclaredMethod("getConnectionState",(Class[])null);
+            int state=(int)method.invoke(bluetoothAdapter,(Object[])null);
             if(state==BluetoothAdapter.STATE_CONNECTED){
                 return true;
             }
         }
-        catch(NoSuchMethodException | IllegalAccessException | InvocationTargetException e){
-            Log.e(TAG,"NoSuchMethodException",e);
+        catch(NoSuchMethodException|IllegalAccessException|InvocationTargetException e){
+            Log.e(TAG,"homeBluetoothConnected",e);
         }
         return false;
     }
 
+    private void homeBluetoothConnect(){
+        homeRefreshUI(R.drawable.bluetooth_searching,R.string.home_bluetooth_status_connecting);
+        if(ActivityCompat.checkSelfPermission(requireContext(),Manifest.permission.BLUETOOTH_SCAN)!=PackageManager.PERMISSION_GRANTED){
+            homeRefreshUI(R.drawable.bluetooth_unavailable,R.string.home_bluetooth_status_init_fail_unauthorized);
+        }
+        else{
+            ConnectThread connectThread=new ConnectThread(bluetoothSocket,true);
+            connectThread.start();
+        }
+    }
+
+    private class ConnectThread extends Thread{
+        private BluetoothSocket bluetoothSocket;
+        private boolean activateConnect;
+        private ConnectThread(BluetoothSocket bluetoothSocket,boolean connect){
+            this.bluetoothSocket=bluetoothSocket;
+            this.activateConnect=connect;
+        }
+
+        @Override
+        public void run(){
+            if(activateConnect){
+                try{
+                    bluetoothSocket=bluetoothDevice.createRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"));
+                }
+                catch(Exception e){
+                    Log.e(TAG,"ConnectThread",e);
+                }
+                try{
+                    Thread.sleep(500);
+                }
+                catch(InterruptedException e){
+                    Log.e(TAG,"ConnectThread",e);
+                }
+                new Thread(){
+                    @Override
+                    public void run(){
+                        try{
+                            bluetoothSocket.connect();
+                            homeRefreshUI(R.drawable.bluetooth_connected,R.string.home_bluetooth_connect_success);
+                            bluetoothAvailability=2;
+                        }
+                        catch(IOException e){
+                            homeRefreshUI(R.drawable.bluetooth_unconnected,R.string.home_bluetooth_connect_fail);
+                            bluetoothAvailability=1;
+                            Log.e(TAG,"ConnectThread",e);
+                        }
+                    }
+                }.start();
+            }
+        }
+    }
+
+    private boolean homeBluetoothSend(int signal){
+        if(ActivityCompat.checkSelfPermission(requireContext(),Manifest.permission.BLUETOOTH_CONNECT)!=PackageManager.PERMISSION_GRANTED){
+            homeRefreshUI(R.drawable.bluetooth_unavailable,R.string.home_bluetooth_status_init_fail_unauthorized);
+            return false;
+        }
+        else{
+            try {
+                bluetoothSocket=bluetoothDevice.createRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805f9b34fb"));
+                OutputStream outputStream=bluetoothSocket.getOutputStream();
+                bluetoothSocket.getOutputStream().write(signal);
+            }
+            catch(IOException e){
+                Log.e(TAG,"homeBluetoothSend",e);
+                return false;
+            }
+            return true;
+        }
+    }
+
     @Override
-    public void onDestroyView() {
+    public void onDestroyView(){
         super.onDestroyView();
     }
 }
