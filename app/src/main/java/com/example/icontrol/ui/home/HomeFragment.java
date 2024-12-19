@@ -34,9 +34,6 @@ import com.example.icontrol.R;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.UUID;
 
 @RequiresApi(api = Build.VERSION_CODES.S)
 public class HomeFragment extends Fragment{
@@ -76,8 +73,8 @@ public class HomeFragment extends Fragment{
         home_textview_bluetooth_status=rootView.findViewById(R.id.home_bluetooth_status);
         home_imageview_bluetooth_status=rootView.findViewById(R.id.home_imageview_bluetooth_status);
         homeInit();
-        home_button_switch_1.setOnClickListener(v->homeImageButtonAction(home_button_switch_1,home_textview_switch_status_1,1));
-        home_button_switch_2.setOnClickListener(v->homeImageButtonAction(home_button_switch_2,home_textview_switch_status_2,2));
+        home_button_switch_1.setOnClickListener(v->homeImageButtonAction(home_button_switch_1,home_textview_switch_status_1,3));
+        home_button_switch_2.setOnClickListener(v->homeImageButtonAction(home_button_switch_2,home_textview_switch_status_2,4));
         home_button_refresh.setOnClickListener(v->homeReset());
         return rootView;
     }
@@ -118,8 +115,8 @@ public class HomeFragment extends Fragment{
             String switch_key="status_switch_"+signal;
             String bar_key="status_bar_"+signal;
             homeSharedPreferencesInit();
-            signal+=(sharedPreferences.getInt(switch_key,-1)+sharedPreferences.getInt(bar_key,-1))%2*2;
-            boolean flag=homeBluetoothSend(signal);
+            signal-=(sharedPreferences.getInt(switch_key,-1)+sharedPreferences.getInt(bar_key,-1))%2*2;
+            boolean flag=homeBluetoothSend();
             if(flag){
                 int status = 1-sharedPreferences.getInt(switch_key, -1);
                 editor.putInt(switch_key,status);
@@ -223,35 +220,11 @@ public class HomeFragment extends Fragment{
         return (scanPermission)&&(connectPermission)&&(advertisePermission)&&(adminPermission)&&(Permission);
     }
 
-    private boolean homeBluetoothConnected(BluetoothAdapter bluetoothAdapter){
-        try{
-            Method method=bluetoothAdapter.getClass().getDeclaredMethod("getConnectionState",(Class[])null);
-            int state=(int)method.invoke(bluetoothAdapter,(Object[])null);
-            if(state==BluetoothAdapter.STATE_CONNECTED){
-                return true;
-            }
-        }
-        catch(NoSuchMethodException|IllegalAccessException|InvocationTargetException e){
-            Log.e(TAG,"homeBluetoothConnected",e);
-        }
-        return false;
-    }
-
-    private void homeBluetoothConnect(){
+    private boolean homeBluetoothSend(){
         homeRefreshUI(R.drawable.bluetooth_searching,R.string.home_bluetooth_status_connecting);
         if(ActivityCompat.checkSelfPermission(requireContext(),Manifest.permission.BLUETOOTH_SCAN)!=PackageManager.PERMISSION_GRANTED){
             homeRefreshUI(R.drawable.bluetooth_unavailable,R.string.home_bluetooth_status_init_fail_unauthorized);
-        }
-        else{
-            ConnectThread connectThread=new ConnectThread(bluetoothSocket,true);
-            connectThread.start();
-        }
-    }
-
-    private boolean homeBluetoothSend(int signal){
-        homeRefreshUI(R.drawable.bluetooth_searching,R.string.home_bluetooth_status_connecting);
-        if(ActivityCompat.checkSelfPermission(requireContext(),Manifest.permission.BLUETOOTH_SCAN)!=PackageManager.PERMISSION_GRANTED){
-            homeRefreshUI(R.drawable.bluetooth_unavailable,R.string.home_bluetooth_status_init_fail_unauthorized);
+            return false;
         }
         else{
             ConnectThread connectThread=new ConnectThread(bluetoothSocket,true);
