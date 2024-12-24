@@ -61,6 +61,7 @@ public class HomeFragment extends Fragment{
     public int signal;
     private final BluetoothDevice bluetoothDevice=bluetoothAdapter.getRemoteDevice("00:24:07:00:41:18");
     private int bluetoothAvailability=0;
+    public static volatile boolean sent=false;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState){
@@ -112,21 +113,29 @@ public class HomeFragment extends Fragment{
             home_textview_bluetooth_status.setText(R.string.home_bluetooth_send_unavailable);
         }
         else{
-            String switch_key="status_switch_"+signal;
-            String bar_key="status_bar_"+signal;
+            String switch_key="status_switch_"+(signal-2);
+            String bar_key="status_bar_"+(signal-2);
             homeSharedPreferencesInit();
             signal-=(sharedPreferences.getInt(switch_key,-1)+sharedPreferences.getInt(bar_key,-1))%2*2;
-            boolean flag=homeBluetoothSend();
-            if(flag){
+            Toast.makeText(requireContext(),String.valueOf(signal),Toast.LENGTH_SHORT).show();
+            homeSharedPreferencesDelete();
+            homeBluetoothSend();
+            if(sent){
+                homeSharedPreferencesInit();
                 int status = 1-sharedPreferences.getInt(switch_key, -1);
+                Toast.makeText(requireContext(),String.valueOf(status),Toast.LENGTH_SHORT).show();
                 editor.putInt(switch_key,status);
+                editor.putInt("sent_status",0);
                 homeSharedPreferencesDelete();
                 homeImageButtonInit(imageButton,textView,switch_key);
             }
             else{
                 home_textview_bluetooth_status.setText(R.string.home_bluetooth_send_fail);
+                editor.putInt("sent_status",0);
+                homeSharedPreferencesDelete();
             }
         }
+        sent=false;
     }
 
     private void homeImageButtonInit(ImageButton imageButton,TextView textView,String key){
@@ -220,17 +229,15 @@ public class HomeFragment extends Fragment{
         return (scanPermission)&&(connectPermission)&&(advertisePermission)&&(adminPermission)&&(Permission);
     }
 
-    private boolean homeBluetoothSend(){
+    private void homeBluetoothSend(){
         homeRefreshUI(R.drawable.bluetooth_searching,R.string.home_bluetooth_status_connecting);
         if(ActivityCompat.checkSelfPermission(requireContext(),Manifest.permission.BLUETOOTH_SCAN)!=PackageManager.PERMISSION_GRANTED){
             homeRefreshUI(R.drawable.bluetooth_unavailable,R.string.home_bluetooth_status_init_fail_unauthorized);
-            return false;
         }
         else{
             ConnectThread connectThread=new ConnectThread(bluetoothSocket,true);
             connectThread.start();
         }
-        return true;
     }
 
     private class ConnectThread extends Thread{
@@ -253,6 +260,7 @@ public class HomeFragment extends Fragment{
                 }
                 try{
                     Thread.sleep(500);
+
                 }
                 catch(InterruptedException e){
                     Log.e(TAG,"ConnectThread",e);
@@ -266,12 +274,14 @@ public class HomeFragment extends Fragment{
                             OutputStream outputStream=bluetoothSocket.getOutputStream();
                             outputStream.write(String.valueOf(signal).getBytes());
                             bluetoothSocket.close();
+                            sent=true;
                             Looper.prepare();
                             Toast.makeText(requireContext(),"success",Toast.LENGTH_SHORT).show();
                             Looper.loop();
                         }
                         catch(IOException e){
                             homeRefreshUI(R.drawable.bluetooth_unconnected,R.string.home_bluetooth_connect_fail);
+                            sent=false;
                             bluetoothAvailability=1;
                             Log.e(TAG,"ConnectThread",e);
                         }
