@@ -117,13 +117,11 @@ public class HomeFragment extends Fragment{
             String bar_key="status_bar_"+(signal-2);
             homeSharedPreferencesInit();
             signal-=(sharedPreferences.getInt(switch_key,-1)+sharedPreferences.getInt(bar_key,-1))%2*2;
-            Toast.makeText(requireContext(),String.valueOf(signal),Toast.LENGTH_SHORT).show();
             homeSharedPreferencesDelete();
             homeBluetoothSend();
             if(sent){
                 homeSharedPreferencesInit();
                 int status = 1-sharedPreferences.getInt(switch_key, -1);
-                Toast.makeText(requireContext(),String.valueOf(status),Toast.LENGTH_SHORT).show();
                 editor.putInt(switch_key,status);
                 editor.putInt("sent_status",0);
                 homeSharedPreferencesDelete();
@@ -260,7 +258,6 @@ public class HomeFragment extends Fragment{
                 }
                 try{
                     Thread.sleep(500);
-
                 }
                 catch(InterruptedException e){
                     Log.e(TAG,"ConnectThread",e);
@@ -276,7 +273,6 @@ public class HomeFragment extends Fragment{
                             bluetoothSocket.close();
                             sent=true;
                             Looper.prepare();
-                            Toast.makeText(requireContext(),"success",Toast.LENGTH_SHORT).show();
                             Looper.loop();
                         }
                         catch(IOException e){
