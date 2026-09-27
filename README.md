@@ -2,6 +2,8 @@
 
 iControl is an application developed as part of the project of *Introduction to Engineering*, a course of **Shanghai Jiao Tong University** (SJTU). Built using **Android Studio** and **Java**, the application is designed to run on most Android devices.
 
+ARCHIVED on Sep 27, 2026 as the course has been taken.
+
 ### Table of Contents
 
 - [Project Overview](#ProjectOverview)
